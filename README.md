@@ -32,6 +32,6 @@ Extensive functionality, very clear promise-based interface, automatic serializa
 
 ### Wouter
 
-`Wouter is used as an SPA (Single-Page App) router.
+`Wouter` is used as an SPA (Single-Page App) router.
 
 The most widely used option here is `react-router`, however `wouter` seems good enough while being significantly more compact.
