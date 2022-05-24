@@ -20,7 +20,6 @@ const countAllStatuses: ApiFunction<void, PieChartDatum[]> = async (axios) => {
 
 const Statistics = () => {
   const { data } = useApiAndCall(countAllStatuses)
-  console.log(data)
 
   if (data == null) {
     return <CircularProgress />

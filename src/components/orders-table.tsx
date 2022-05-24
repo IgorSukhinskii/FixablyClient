@@ -1,6 +1,6 @@
 import React from 'react'
 
-import DataTable from 'components/data-table'
+import DataTablePaginated from 'components/data-table-paginated'
 import { GridColDef } from '@mui/x-data-grid'
 
 import { getOrders } from 'api/methods'
@@ -15,5 +15,5 @@ const columns: GridColDef[] = [
 ]
 
 export default function OrdersTable() {
-  return <DataTable columns={columns} apiFunction={getOrders} />
+  return <DataTablePaginated columns={columns} apiFunction={getOrders} />
 }
