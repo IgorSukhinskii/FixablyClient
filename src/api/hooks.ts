@@ -17,14 +17,14 @@ export const useApi = <CallProps, ResponseData>(
   const axios = useMemo(() => {
     return contextAxios || mainAxios
   }, [contextAxios])
-  const [data, setData] = useState<ResponseData | null>(null)
+  const [data, setData] = useState<ResponseData | undefined>(undefined)
   const [error, setError] = useState(null)
   const [loaded, setLoaded] = useState(false)
 
   const call = (props: CallProps) => {
     setLoaded(false)
     apiFunction(axios, props)
-      .then((response) => setData(response.data))
+      .then((response) => setData(response))
       .catch((reason) => setError(reason))
       .finally(() => setLoaded(true))
   }

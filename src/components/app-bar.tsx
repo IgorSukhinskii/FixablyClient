@@ -7,9 +7,10 @@ import {
   Typography,
   Box,
   Button,
+  Link,
 } from '@mui/material'
 
-const pages = ['Products', 'Pricing', 'Blog']
+import routes from 'router/routes'
 
 const MainAppBar = () => {
   return (
@@ -35,14 +36,9 @@ const MainAppBar = () => {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: 'flex' }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={() => {}}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-                variant="text"
-              >
-                {page}
+            {routes.map((route) => (
+              <Button color="secondary" href={route.path} key={route.path}>
+                {route.name}
               </Button>
             ))}
           </Box>

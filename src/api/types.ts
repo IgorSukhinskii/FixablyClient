@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosResponse } from 'axios'
+import { AxiosInstance } from 'axios'
 
 export type DeviceType = 'Laptop' | 'Phone' | 'Tablet'
 export interface Note {
@@ -29,7 +29,7 @@ export interface PaginatedResponse<T> {
 export type ApiFunction<CallProps, ResponseData> = (
   axios: AxiosInstance,
   props: CallProps
-) => Promise<AxiosResponse<ResponseData>>
+) => Promise<ResponseData>
 
 export interface Device {
   DeviceManufacturer: string
@@ -47,7 +47,12 @@ export type SearchType = 'notes' | 'technicians' | 'devices' | 'statuses'
 
 export interface UseApiReturnType<CallProps, ResponseData> {
   call: (props: CallProps) => void
-  data: ResponseData | null
+  data: ResponseData | undefined
   error: any
   loaded: boolean
+}
+
+export interface Status {
+  id: number
+  description: string
 }

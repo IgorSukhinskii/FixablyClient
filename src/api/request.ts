@@ -33,23 +33,25 @@ export const request = <
   data?: RequestData,
   params?: RequestParams,
   config?: AxiosRequestConfig<RequestData>
-): Promise<AxiosResponse<ResponseData, RequestData>> => {
-  return fetchToken(axiosInstance).then(() =>
-    axiosInstance.request<
-      ResponseData,
-      AxiosResponse<ResponseData, RequestData>,
-      RequestData
-    >({
-      method,
-      url,
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      data,
-      params,
-      ...config,
-    })
-  )
+): Promise<ResponseData> => {
+  return fetchToken(axiosInstance)
+    .then(() =>
+      axiosInstance.request<
+        ResponseData,
+        AxiosResponse<ResponseData, RequestData>,
+        RequestData
+      >({
+        method,
+        url,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        data,
+        params,
+        ...config,
+      })
+    )
+    .then((response) => response.data)
 }
 
 export default request

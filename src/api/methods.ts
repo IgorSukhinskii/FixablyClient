@@ -7,6 +7,7 @@ import {
   Device,
   SearchType,
   NoteRequest,
+  Status,
 } from './types'
 
 export const getOrders: ApiFunction<Paginated, PaginatedResponse<Order>> = (
@@ -34,7 +35,7 @@ export const createNote: ApiFunction<
 > = (axios, { orderId, note }) =>
   request(axios, `/orders/${orderId}/notes/create`, 'POST', { data: note })
 
-export const getStatuses: ApiFunction<void, any> = (axios) =>
+export const getStatuses: ApiFunction<void, Status[]> = (axios) =>
   request(axios, 'GET', '/statuses')
 
 export const getReport: ApiFunction<
@@ -48,6 +49,6 @@ export const getReport: ApiFunction<
 
 export const search: ApiFunction<
   Paginated<{ type: SearchType; criteria: string }>,
-  any
+  PaginatedResponse<Order>
 > = (axios, { type, criteria, ...props }) =>
   request(axios, 'POST', `/search/${type}`, { Criteria: criteria }, props)

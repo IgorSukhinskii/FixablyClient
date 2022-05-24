@@ -4,7 +4,7 @@ import { Stack, CssBaseline, Container } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
 import themeOptions from 'themes/defaultTheme'
-import Router from 'components/router'
+import Router from 'router'
 import AppBar from 'components/app-bar'
 import { AxiosInstanceProvider } from 'api/context'
 
