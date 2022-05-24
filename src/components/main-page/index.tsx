@@ -1,24 +1,30 @@
-import React, { useEffect } from 'react';
-import { Button, CircularProgress } from '@mui/material';
+import React, { useEffect } from 'react'
+import { Button, CircularProgress } from '@mui/material'
 
-import { Device, getOrders, createOrder, useApi, useApiAndCall } from 'api';
+import { getOrders } from 'api/methods'
+import { useAutoPaginatedApi } from 'api/hooks'
+import { Device } from 'api/types'
 
 const MainPage = () => {
-  const { call, data, loaded } = useApi(createOrder);
-  const device: Device = {
-    DeviceManufacturer: 'string',
-    DeviceBrand: 'string',
-    DeviceType: 'Phone',
-  };
+  const { data, loaded, next, page, total } = useAutoPaginatedApi(getOrders)
+  // const device: Device = {
+  //   DeviceManufacturer: 'string',
+  //   DeviceBrand: 'string',
+  //   DeviceType: 'Phone',
+  // }
+  // const props = { orderId: 9243 }
+  const props = { page: 308 }
 
-  useEffect(() => call({ device }), []);
-  
-  console.log(data);
-  console.log(loaded);
+  console.log(data)
+  console.log(page, total, loaded)
 
-  return loaded ?
-    <Button variant='contained' onClick={() => call({ device })}>Click Me!</Button> :
-    <CircularProgress />;
-};
+  return loaded ? (
+    <Button variant="contained" onClick={next}>
+      Click Me!
+    </Button>
+  ) : (
+    <CircularProgress />
+  )
+}
 
-export default MainPage;
+export default MainPage

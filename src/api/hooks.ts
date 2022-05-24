@@ -1,150 +1,84 @@
-import { useState, useEffect, useRef, useContext, useMemo } from 'react';
-import axios, { AxiosRequestConfig, AxiosInstance, AxiosResponse } from 'axios';
+import { useState, useMemo, useEffect } from 'react'
 
-import { AxiosContext } from './context';
+import mainAxios from 'axios'
 
-export const useToken = (axiosInstance: AxiosInstance) => {
-  const code = Number(process.env.REACT_APP_CODE);
-  console.log('CODE: ', code);
-  const fetchTokenIfNeeded = () => {
-    const code = Number(process.env.REACT_APP_CODE);
-    return new Promise<void>((resolve, reject) => {
-      if (axiosInstance.defaults.headers.common['X-Fixably-Token'] != null) {
-        console.log('EXISTING TOKEN: ', axiosInstance.defaults.headers.common['X-Fixably-Token']);
-        resolve();
-      } else {
-        axiosInstance
-          .post('token', {Code: code}, { headers: {
-            'Content-Type': 'multipart/form-data'
-          }})
-          .then((response) => {
-            console.log('TOKEN RESPONSE: ', response);
-            axiosInstance.defaults.headers.common['X-Fixably-Token'] = response.data.token;
-            resolve();
-          })
-          .catch(reason => reject(reason));
-      }
-    });
-  };
-  return fetchTokenIfNeeded;
-};
+import { useAxios } from './context'
+import {
+  ApiFunction,
+  Paginated,
+  PaginatedResponse,
+  UseApiReturnType,
+} from './types'
 
-interface UseApiReturnType {
-  cancel: () => void;
-  data: any;
-  error: any;
-  loaded: boolean;
-}
+export const useApi = <CallProps, ResponseData>(
+  apiFunction: ApiFunction<CallProps, ResponseData>
+): UseApiReturnType<CallProps, ResponseData> => {
+  const contextAxios = useAxios()
+  const axios = useMemo(() => {
+    return contextAxios || mainAxios
+  }, [contextAxios])
+  const [data, setData] = useState<ResponseData | null>(null)
+  const [error, setError] = useState(null)
+  const [loaded, setLoaded] = useState(false)
 
-const fetchToken = (axiosInstance: AxiosInstance): Promise<void> => {
-  if (axiosInstance.defaults.headers.common['X-Fixably-Token'] != null) {
-    return Promise.resolve();
-  } else {
-    const Code = Number(process.env.REACT_APP_CODE);
-    return axiosInstance
-      .post('token', { Code }, { headers: {
-        'Content-Type': 'multipart/form-data'
-      }})
-      .then((response) => {
-        axiosInstance.defaults.headers.common['X-Fixably-Token'] = response.data.token;
-      });
+  const call = (props: CallProps) => {
+    setLoaded(false)
+    apiFunction(axios, props)
+      .then((response) => setData(response.data))
+      .catch((reason) => setError(reason))
+      .finally(() => setLoaded(true))
   }
-};
 
-const request = <RequestData, RequestParams, ResponseData>(
-  axiosInstance: AxiosInstance,
-  method: string,
-  url: string,
-  data?: RequestData,
-  params?: RequestParams,
-  config?: AxiosRequestConfig<RequestData>
-): Promise<AxiosResponse<ResponseData, RequestData>> => {
-  return fetchToken(axiosInstance).then(() =>
-    axiosInstance.request<ResponseData, AxiosResponse<ResponseData, RequestData>, RequestData>({
-      method,
-      url,
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      data,
-      params,
-      ...config
-  }));
-};
-
-interface ProxyAxios {
-  get: <
-      RequestParams = any,
-      ResponseData = any
-    >(
-      url: string,
-      params: RequestParams
-    ) => Promise<AxiosResponse<ResponseData, {}>>;
-  post: <
-      RequestData = any,
-      RequestParams = any,
-      ResponseData = any
-    >(
-      url: string,
-      data: RequestData,
-      params?: RequestParams
-    ) => Promise<AxiosResponse<ResponseData, RequestData>>
+  return { call, data, error, loaded }
 }
 
-const proxyAxios = (axiosInstance: AxiosInstance, config?: AxiosRequestConfig) => {
+export const useApiAndCall = <ResponseData>(
+  apiFunction: ApiFunction<any, ResponseData>
+) => {
+  const { call, ...rest } = useApi(apiFunction)
+  const wrappedCall = () => call(undefined)
+  useEffect(wrappedCall, [])
+  return { call: wrappedCall, ...rest }
+}
+
+export const usePaginatedApi = <CallProps, ResponseData>(
+  apiFunction: ApiFunction<
+    Paginated<CallProps>,
+    PaginatedResponse<ResponseData>
+  >
+) => {
+  const { call, data, loaded, ...rest } = useApi(apiFunction)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(1)
+  const pageSize = 10
+  const wrappedCall = (props: CallProps) => call({ page, ...props })
+  const next = () => setPage(page * pageSize < total ? page + 1 : page)
+  const prev = () => setPage(page > 1 ? page - 1 : page)
+
+  if (data != null && loaded && total != data.total) {
+    setTotal(data.total)
+  }
+
   return {
-    get: <
-        RequestParams = any,
-        ResponseData = any
-      >(
-        url: string,
-        params: RequestParams
-      ): Promise<AxiosResponse<ResponseData, {}>> =>
-        request(axiosInstance, 'GET', url, {}, params, config),
-    post: <
-        RequestData = any,
-        RequestParams = any,
-        ResponseData = any
-      >(
-        url: string,
-        data: RequestData,
-        params?: RequestParams
-      ): Promise<AxiosResponse<ResponseData, RequestData>> =>
-        request(axiosInstance, 'POST', url, data, params, config)
-  };
-};
+    call: wrappedCall,
+    data: data?.results,
+    loaded,
+    page,
+    setPage,
+    next,
+    prev,
+    total,
+    ...rest,
+  }
+}
 
-export const useApi = () => {
-  const controllerRef = useRef(new AbortController());
-  const cancel = () => {
-    controllerRef.current.abort();
-  };
-
-  const contextInstance = useContext(AxiosContext);
-  const axiosInstance = useMemo(() => {
-    return contextInstance || axios;
-  }, [contextInstance]);
-
-  const { get, post } = proxyAxios(axiosInstance, { signal: controllerRef.current.signal });
-
-  return { get, post, cancel };
-};
-
-
-export const useApiCall = (
-    send: (config?: AxiosRequestConfig) => Promise<AxiosResponse<any, any>>,
-    cancel: () => void
-  ): UseApiReturnType => {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-  const [loaded, setLoaded] = useState(false);
-
+export const useAutoPaginatedApi = <ResponseData>(
+  apiFunction: ApiFunction<Paginated, PaginatedResponse<ResponseData>>
+) => {
+  const { call, page, ...rest } = usePaginatedApi(apiFunction)
   useEffect(() => {
-    send()
-      .then(response => setData(response.data))
-      .catch(error => setError(error))
-      .finally(() => setLoaded(loaded));
-  }, []);
-
-  return { cancel, data, error, loaded };
-};
+    call(undefined)
+    console.log('======================CALLING===================')
+  }, [page])
+  return { call, page, ...rest }
+}
