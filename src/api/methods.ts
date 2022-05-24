@@ -8,6 +8,7 @@ import {
   SearchType,
   NoteRequest,
   Status,
+  Invoice,
 } from './types'
 
 export const getOrders: ApiFunction<Paginated, PaginatedResponse<Order>> = (
@@ -40,7 +41,7 @@ export const getStatuses: ApiFunction<void, Status[]> = (axios) =>
 
 export const getReport: ApiFunction<
   Paginated<{ fromDate: Date; toDate: Date }>,
-  any
+  PaginatedResponse<Invoice>
 > = (axios, { fromDate, toDate, ...props }) => {
   const formatDate = (date: Date) => date.toISOString().substring(0, 10)
   const [from, to] = [fromDate, toDate].map(formatDate)

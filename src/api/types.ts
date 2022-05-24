@@ -56,3 +56,10 @@ export interface Status {
   id: number
   description: string
 }
+
+export interface Invoice {
+  amount: number
+  created: string
+  id: number
+  orderId: number
+}
