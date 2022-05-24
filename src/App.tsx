@@ -1,32 +1,33 @@
-import React from 'react';
-import { Switch, Route } from 'wouter';
-import { Stack, CssBaseline } from '@mui/material';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import React from 'react'
 
-import themeOptions from 'themes/defaultTheme';
-import MainPage from 'components/main-page';
-import { AxiosInstanceProvider } from 'api/context';
+import { Stack, CssBaseline, Container } from '@mui/material'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 
-const theme = createTheme(themeOptions);
+import themeOptions from 'themes/defaultTheme'
+import Router from 'components/router'
+import AppBar from 'components/app-bar'
+import { AxiosInstanceProvider } from 'api/context'
+
+const theme = createTheme(themeOptions)
 
 function App() {
   return (
     <AxiosInstanceProvider>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Stack
-          alignItems="center"
-          justifyContent="center"
-          sx={{ height: "100%" }}
-        >
-          <Switch>
-            <Route path='/' component={MainPage} />
-            <Route />
-          </Switch>
-        </Stack>
+        <AppBar />
+        <Container maxWidth="sm">
+          <Stack
+            alignItems="center"
+            justifyContent="center"
+            sx={{ height: '100%' }}
+          >
+            <Router />
+          </Stack>
+        </Container>
       </ThemeProvider>
     </AxiosInstanceProvider>
-  );
+  )
 }
 
-export default App;
+export default App

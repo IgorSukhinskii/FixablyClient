@@ -15,9 +15,6 @@ const MainPage = () => {
   // const props = { orderId: 9243 }
   const props = { page: 308 }
 
-  console.log(data)
-  console.log(page, total, loaded)
-
   return loaded ? (
     <Button variant="contained" onClick={next}>
       Click Me!

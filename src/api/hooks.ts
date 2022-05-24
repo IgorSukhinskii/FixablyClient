@@ -61,13 +61,14 @@ export const usePaginatedApi = <CallProps, ResponseData>(
 
   return {
     call: wrappedCall,
-    data: data?.results,
+    data: data?.results || [],
     loaded,
     page,
     setPage,
     next,
     prev,
     total,
+    pageSize,
     ...rest,
   }
 }
@@ -78,7 +79,6 @@ export const useAutoPaginatedApi = <ResponseData>(
   const { call, page, ...rest } = usePaginatedApi(apiFunction)
   useEffect(() => {
     call(undefined)
-    console.log('======================CALLING===================')
   }, [page])
   return { call, page, ...rest }
 }
